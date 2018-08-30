@@ -1,3 +1,5 @@
+console.log('_Language_ Interpretation and Recognition Interface');
+
 require("dotenv").config();
 var request = require("request");
 var moment = require("moment");
@@ -9,8 +11,8 @@ var omdbId = process.env.OMDB_apikey;
 var bitId = process.env.BiT_appID;
 var task = '';
 var target;
-
 var inquirer = require("inquirer");
+
 inquirer
     .prompt([
         {
@@ -25,10 +27,6 @@ inquirer
             task = inquirerResponse.task;
             console.log(task);
         }
-
-        // runTask();
-
-        // function runTask() {
         if (task === 'concert-this') {
             band();
         } else if (task === 'spotify-this-song') {
@@ -38,14 +36,11 @@ inquirer
         } else if (task === 'do-what-it-says') {
             what();
         }
-        // }
-
     });
 
 
 
 function band() {
-
     inquirer
         .prompt([
             {
@@ -63,9 +58,8 @@ function band() {
             var BiTqueryUrl = 'https://rest.bandsintown.com/artists/' + target + '/events?app_id=' + bitId + "'";
             request(BiTqueryUrl, function (error, response, body) {
                 if (!error && response.statusCode === 200) {
-                    console.log(JSON.parse(body));
-                    console.log('* Artist: ' + band);
-                    for (var i = 0; i < 10; i++) {
+                    console.log('* Artist: ' + JSON.parse(body)[0].lineup[0]);
+                    for (var i = 0; i < 4; i++) {
                         eventDate = JSON.parse(body)[i].datetime;
                         console.log('\n* Venue Name: ' + JSON.parse(body)[i].venue.name);
                         console.log('* Venue Location: ' + JSON.parse(body)[i].venue.city);
@@ -77,7 +71,6 @@ function band() {
 }
 
 function song() {
-    var inquirer = require("inquirer");
     inquirer
         .prompt([
             {
@@ -93,7 +86,7 @@ function song() {
                 var songArray = song.split();
                 var target = songArray.join('%20').trim();
             } else {
-                target = 'the sign';
+                target = "the sign ace of base";
             }
 
             var spotify = new Spotify({
@@ -105,19 +98,14 @@ function song() {
                 if (err) {
                     return console.log('Error occurred: ' + err);
                 }
-
-                console.log(data.tracks.items[0].album.name);
-                // console.log(data.tracks.items[1]);
-                // console.log(data.tracks.items[2]);
-                // console.log(data.tracks.items[3]);
+                for (var x = 0; x < 4; x++) {
+                    console.log('\n* Artist: ' + data.tracks.items[x].album.artists[0].name);
+                    console.log('* Song Title: ' + data.tracks.items[x].name);
+                    console.log('* Album: ' + data.tracks.items[x].album.name);
+                    console.log('* Song Link: ' + data.tracks.items[x].preview_url);
+                }
             });
-
-            //         console.log('* Artist: ' + JSON.parse(body).Year);
-            //         console.log('* Song Title: ' + JSON.parse(body).Title);
-            //         console.log('* Album: ' + JSON.parse(body).Album);
-            //         console.log('* Song Link: ' + JSON.parse(body).Year);
         });
-
 }
 
 function movie() {
@@ -134,6 +122,8 @@ function movie() {
                 var movie = inquirerResponse4.movie;
                 var movieArray = movie.split();
                 var target = movieArray.join('+').trim();
+            } else {
+                target = "Mr.+Nobody";
             }
             var omdbQueryUrl = "http://www.omdbapi.com/?t=" + target + "&y=&plot=short&apikey=" + omdbId;
             request(omdbQueryUrl, function (error, response, body) {
@@ -153,25 +143,23 @@ function movie() {
 }
 
 function what() {
-    console.log(song)
     var fs = require('fs');
     fs.readFile('random.txt', 'utf8', function (error, data) {
         if (error) {
             return console.log(error);
+        } else {
+            var search = data.split(',');
+            task = search[0];
+            target = search[1];
+            if (task === 'concert-this') {
+                band();
+            } else if (task === 'spotify-this-song') {
+                song();
+            } else if (task === 'movie-this') {
+                movie();
+            } else if (task === 'do-what-it-says') {
+                what();
+            }
         }
-        var search = data.split(',');
-        task = search[0];
-        tagret = search[1];
-        if (task === 'concert-this') {
-            band();
-        } else if (task === 'spotify-this-song') {
-            song();
-        } else if (task === 'movie-this') {
-            movie();
-        } else if (task === 'do-what-it-says') {
-            what();
-        }
-    }
-
-    )
+    })
 }
